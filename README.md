@@ -4,16 +4,15 @@ lwrpc
 Lightweight, JSON-RPC 2.0 client and server plumbing for Node.js and browsers.
 This library allows you to
 
-- Create and manage RPC-enabled services based on simple Javascript objects and
-  functions.
+- Create and manage [JSON-RPC 2.0](http://www.jsonrpc.org/specification)-compliant
+  services based on simple Javascript objects and functions.
 - Expose those functions via any number of transports, including (but not
   limited to) HTTP and WebSockets.
-- Invoke JSON-RPC 2.0-complient servers.
+- Invoke RPC methods on JSON-RPC 2.0-compliant servers.
 - Quickly and easily create promise-based proxy objects whose methods are
   invoked on a server.
-- [JSON-RPC 2.0](http://www.jsonrpc.org/specification)-compliant.
+- Build custom RPC transport mechanisms.
 - No dependencies
-- Transport-agnostic
 
 Getting Started
 ---------------
