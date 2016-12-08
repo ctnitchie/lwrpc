@@ -4,6 +4,7 @@ lwrpc
 Lightweight, JSON-RPC 2.0 client and server plumbing for Node.js and browsers.
 
 - [JSON-RPC 2.0](http://www.jsonrpc.org/specification)-compliant.
+- Promise-based
 - No dependencies
 - Transport-agnostic
 - Simple proxy bootstrapping
@@ -17,7 +18,7 @@ Getting Started
 
 On the server:
 
-    // Import the library and create a Service Manager
+    // Import the library
     const rpc = require('lwrpc/server');
 
     // Create a service and configure it for RPC
@@ -36,7 +37,7 @@ On the server:
     const io = socketio(server);
     rpc.socketioBinding(io);
 
-Now using the lwrpc client library:
+You can call this from Node:
 
     // Load the 'fetch' polyfill and other dependencies
     require('node-fetch');
@@ -46,7 +47,7 @@ Now using the lwrpc client library:
     const rpc = require('lwrpc/client');
 
     // Create the connection
-    const httpClient = new rpc.HTTPClient('/rpc/');
+    const httpClient = new rpc.HTTPClient('http://localhost:3000/rpc/');
     // or
     const socketClient = new rpc.SocketClient(io('localhost:3000'));
 
@@ -62,6 +63,25 @@ Now using the lwrpc client library:
     // Or if you have access to async/await:
     console.log(await echoService.doEcho('Proxy Message'));
 
+Or the browser:
+
+    <!-- Get the Promise polyfill just to be safe. -->
+    <!-- https://github.com/taylorhakes/promise-polyfill -->
+    <script src="promise.js"></script>
+    <!-- And we need the fetch polyfill - https://github.com/github/fetch -->
+    <script src="fetch.js"></script>
+
+
+    <script src="dist/browser/rpcClient.js"></script>
+    <script>
+      // Same 'rpc' object as in the Node client.
+      var httpClient = new rpc.HTTPClient('/rpc/');
+      var echoService = new rpc.Proxy(httpClient, 'echo', 'doEcho');
+      echoService.doEcho('Browser message').then(function(resp) {
+        alert(resp); // 'ECHO: Browser message'
+      });
+    </script>
+
 Or even using `curl`:
 
     curl -d '{"jsonrpc": "2.0", "method": "echo", "params": ["test"], "id": 1}' \
@@ -75,26 +95,42 @@ API
 Server
 ------
 
-**ServiceManager**
+### ServiceManager
 
 A `ServiceManager` manages objects whose methods are exposed for invocation via
 RPC.
 
-    const serviceManager = new ServiceManager([defaultService]);
-    serviceManager.registerService([name], handler);
+**`constructor([defaultService])`**
+
+    const serviceManager = new rpc.ServiceManager([defaultService]);
+
+Creates a new ServiceManager, optionally with a default, unnamed service to be
+called when `null` is used for the service name in an invocation.
+
+**`registerService([name], handler)`**
 
 Register services using the `registerService` method. A service manager _may_
 have an unnamed service, configured either by passing the service object to the
 constructor, or by calling `registerService` with just an object.
 
-There is a read-only `ServiceManager.default` instance which serves as the
-default `ServiceManager` instance. Its methods are also exposed on the
-`ServiceManager` constructor.
+**`uninstallService(name)`**
 
-    // Doing this
-    ServiceManager.registerService('foo', new FooService());
-    // Is the same as this
-    ServiceManager.default.registerService('foo', new FooService());
+Uninstalls the given service and returns it.
+
+**`serviceExists(name)`**
+
+Determines if any service exists with the given name.
+
+**`getServiceNames()`**
+
+Returns an array of service names.
+
+**`methodExists([service], method)`**
+
+Determines if the given method exists on the given service, or the default
+service if no service name is specified.
+
+**`invoke(service, call)`**
 
 Once services are configured with the object, their methods are invoked via
 `invoke([service], requestObject)`.
@@ -111,7 +147,18 @@ representing the JSON-RPC 2.0-compliant response message.
 reported by the response message's `error` property and reported via events
 (see below).
 
-**Asynchronous Methods in Services**
+**`ServiceManager.default`**
+
+There is a read-only `ServiceManager.default` instance which serves as the
+default `ServiceManager` instance. Its methods are also exposed on the
+`ServiceManager` constructor.
+
+    // Doing this
+    ServiceManager.registerService('foo', new FooService());
+    // Is the same as this
+    ServiceManager.default.registerService('foo', new FooService());
+
+### Asynchronous Methods in Services
 
 If a method on a service is asynchronous, it must return a `Promise`. If a
 method you intend to expose uses node-style callbacks, it must be converted into
@@ -119,7 +166,31 @@ a promise-returning function. You can use something like
 [es6-promisify](https://www.npmjs.com/package/es6-promisify) to simplify the
 process.
 
-**Events**
+    const service = {
+      echoCallback(message, cb) {
+        // Can't be called directly over RPC.
+        cb(null, message);
+      },
+
+      echoPromise(message) {
+        // This, though, will work
+        return new Promise((resolve, reject) {
+          this.echoCallback(message, (err, v) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(v);
+            }
+          });
+        });
+      },
+    };
+
+    // Or simply generate the Promise-based version with promisify
+    const promisify = require('es6-promisify');
+    service.echoPromisify = promisify(service.echoCallback.bind(service));
+
+### Events
 
 `ServiceManager` instances emit the following events:
 
@@ -135,7 +206,7 @@ process.
 - `methodCompleted(request, response)` after all other processing, whether the
   method succeeded or failed.
 
-**expressBinding**
+### expressBinding
 
 The `expressBinding()` function binds a `ServiceManager` to an Express `Router`
 for handling RPC requests over `HTTP POST`.
@@ -162,7 +233,7 @@ in batch mode, per the JSON-RPC 2.0 spec.
 it will not instantiate one for you. This allows the library to avoid a direct
 dependency on Express.
 
-**socketioBinding**
+### socketioBinding
 
 The `socketioBinding()` function binds a `ServiceManager` to a socket.io server.
 
@@ -176,7 +247,7 @@ can be customized via the `callMessage` option. Method returns will be
 transmitted as `return` messages whose body is the call result, when a result
 is required. This message can be customized via the `returnMessage` option.
 
-**Creating Custom Bindings**
+### Creating Custom Bindings
 
 Creating a transport binding is relatively simple. All the binding does is
 interpret incoming messages over some transport into JSON-RPC 2.0 method call
@@ -203,7 +274,7 @@ be notified of any errors. Both methods return promises with the full JSON-RPC
 response message, regardless of whether that message represents success or
 failure.
 
-**Proxies**
+## Proxies
 
 Because of this common interface, either client can be used to create `Proxy`
 objects. These are normal JavaScript objects whose methods use the underlying
@@ -217,7 +288,7 @@ When using an RPC server whose protocol doesn't match one of the out-of-the-box
 clients, you can write your own that implements `call` and `notify`, then
 construct Proxy objects with that.
 
-**HTTPClient**
+## HTTPClient
 
 The `HTTPClient` class uses the
 [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) to send
@@ -238,7 +309,7 @@ browsers, so you'll want to use a polyfill, like
 [this one](https://github.com/github/fetch) (for browsers) or
 [this one](https://www.npmjs.com/package/fetch-polyfill) (for Node).
 
-**SocketClient**
+## SocketClient
 
 The `SocketClient` class uses socket.io connections to communicate with the
 RPC server.
