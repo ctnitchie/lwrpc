@@ -2,21 +2,23 @@ lwrpc
 =====
 
 Lightweight, JSON-RPC 2.0 client and server plumbing for Node.js and browsers.
+This library allows you to
 
+- Create and manage RPC-enabled services based on simple Javascript objects and
+  functions.
+- Expose those functions via any number of transports, including (but not
+  limited to) HTTP and WebSockets.
+- Invoke JSON-RPC 2.0-complient servers.
+- Quickly and easily create promise-based proxy objects whose methods are
+  invoked on a server.
 - [JSON-RPC 2.0](http://www.jsonrpc.org/specification)-compliant.
-- Promise-based
 - No dependencies
 - Transport-agnostic
-- Simple proxy bootstrapping
-- Server-side transport implementations for
-  [express](https://www.npmjs.com/package/express) and
-  [socket.io](https://www.npmjs.com/package/socket.io)
-- Client-side implementations for HTTP (via `fetch`) and socket.io.
 
 Getting Started
 ---------------
 
-On the server:
+### On the server:
 
     // Import the library
     const rpc = require('lwrpc/server');
@@ -37,7 +39,7 @@ On the server:
     const io = socketio(server);
     rpc.socketioBinding(io);
 
-You can call this from Node:
+### From node.js clients
 
     // Load the 'fetch' polyfill and other dependencies
     require('node-fetch');
@@ -60,10 +62,10 @@ You can call this from Node:
       console.log(retval); // 'ECHO: Proxy Message'
     });
 
-    // Or if you have access to async/await:
+    // Or if you have access to async/await
     console.log(await echoService.doEcho('Proxy Message'));
 
-Or the browser:
+### From the browser
 
     <!-- Get the Promise polyfill just to be safe. -->
     <!-- https://github.com/taylorhakes/promise-polyfill -->
@@ -82,12 +84,26 @@ Or the browser:
       });
     </script>
 
-Or even using `curl`:
+### Using CURL or any other HTTP client.
 
     curl -d '{"jsonrpc": "2.0", "method": "echo", "params": ["test"], "id": 1}' \
       -H "Content-Type: application/json" \
       -X POST http://localhost:3000/rpc/echo
     # Returns {"jsonrpc":"2.0","result":"ECHO: test","id":1}
+
+### Using WebSockets
+
+    socket.emit('call:echo', {
+      jsonrpc: "2.0",
+      method: "doEcho",
+      params: ["test"],
+      id: 1
+    });
+    socket.on('return', msg => {
+      if (msg.id === 1) {
+        console.log(msg.result); // "ECHO: test"
+      }
+    });
 
 API
 ===
@@ -324,3 +340,7 @@ The `SocketClient` emits the following events:
 
 - `sending(service, topic, message)` before sending a request.
 - `received(response)` when a response is recieved.
+
+**NOTE:** Attempts to call invalid services will fail silently over WebSockets.
+This is because the server is not listening for messages to services it doesn't
+know about, and so will never acknowledge them.
