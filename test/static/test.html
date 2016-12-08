@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <script src="rpcClient.js"></script>
+  <script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
+  <script>
+$(function() {
+  var $log = $('#log');
+  var httpClient = rpcClient.HTTPClient('/rpc/');
+  var testProxy = rpcClient.Proxy(httpClient, null, 'set', 'get');
+  testProxy.get().then(function(v) {
+    log.append('Response from get: ' + v + '\n');
+    return testProxy.set(v + 1);
+  }).then(function(v) {
+    log.append('Response from set: ' + v + '\n');
+    return testProxy.get();
+  }).then(function(v) {
+    log.append('Response from get: ' + v);
+  }).catch(function(e) {
+    console.log(e);
+    log.append('ERROR:\n');
+    log.append(e);
+  });
+
+  var echoProxy = rpcClient.Proxy(httpClient, 'echo', 'echo');
+  echoProxy.echo('test').then(function(v) {
+    log.append('Echo response: ' + v + '\n');
+  });
+
+  var errorProxy = rpcClient.Proxy(httpClient, 'oops', 'test');
+  errorProxy.test().catch(function (e) {
+    log.append('EXPECTED ERROR:\n');
+    log.append(e + '\n');
+  });
+});
+  </script>
+</head>
+<body>
+  Dummy test page.
+  <pre id="log">
+</pre>
+</body>
+</html>

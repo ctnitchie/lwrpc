@@ -1,0 +1,36 @@
+env:
+  browser: true
+  es6: true
+  node: true
+  mocha: true
+extends: 'eslint:recommended'
+parser: 'babel-eslint'
+parserOptions:
+  ecmaVersion: 2017
+  sourceType: 'module'
+  ecmaFeatures:
+    impliedStrict: true
+    jsx: true
+plugins:
+  - react
+  - babel
+rules:
+  indent:
+    - 0
+    - 2
+  linebreak-style:
+    - 1
+    - unix
+  quotes:
+    - 0
+    - single
+  semi:
+    - 2
+    - always
+  no-unused-vars:
+    - 0
+    -
+      vars: 'all'
+      args: 'none'
+  no-console:
+    - 0
