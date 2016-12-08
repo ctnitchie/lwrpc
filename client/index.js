@@ -21,7 +21,7 @@ var rpc = {HTTPClient, SocketClient, Proxy};
         return rpc;
       });
     } else {
-      window.rpcClient = rpc;
+      window.rpc = rpc;
     }
   }
 }());

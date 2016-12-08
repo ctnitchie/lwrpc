@@ -4,16 +4,14 @@
   <title>Test</title>
   <script src="rpcClient.js"></script>
   <script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-  crossorigin="anonymous"></script>
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script>
 $(function() {
   var $log = $('#log');
-  var httpClient = rpcClient.HTTPClient('/rpc/');
-  var socketClient = rpcClient.SocketClient(io());
-  var testProxy = rpcClient.Proxy(httpClient, null, 'set', 'get');
+  var httpClient = rpc.HTTPClient('/rpc/');
+  var socketClient = rpc.SocketClient(io());
+  var testProxy = rpc.Proxy(httpClient, null, 'set', 'get');
   testProxy.get().then(function(v) {
     log.append('Response from get: ' + v + '\n');
     return testProxy.set(v + 1);
@@ -29,12 +27,12 @@ $(function() {
     log.append('\n');
   });
 
-  var echoProxy = rpcClient.Proxy(socketClient, 'echo', 'echo');
+  var echoProxy = rpc.Proxy(socketClient, 'echo', 'echo');
   echoProxy.echo('test').then(function(v) {
     log.append('Echo response: ' + v + '\n');
   });
 
-  var errorProxy = rpcClient.Proxy(socketClient, 'echo', 'invalidMethod');
+  var errorProxy = rpc.Proxy(socketClient, 'echo', 'invalidMethod');
   errorProxy.invalidMethod().catch(function (e) {
     log.append('EXPECTED ERROR:\n');
     log.append(e + '\n');
