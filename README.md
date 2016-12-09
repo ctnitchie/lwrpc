@@ -322,7 +322,7 @@ The resulting object is an `EventEmitter` with the following events:
 **NOTE:** The Fetch API is not supported in Node.js and is not available on some
 browsers, so you'll want to use a polyfill, like
 [this one](https://github.com/github/fetch) (for browsers) or
-[this one](https://www.npmjs.com/package/fetch-polyfill) (for Node).
+[this one](https://www.npmjs.com/package/isomorphic-fetch) (for Node).
 
 ## SocketClient
 
