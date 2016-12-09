@@ -173,6 +173,39 @@ default `ServiceManager` instance. Its methods are also exposed on the
     // Is the same as this
     ServiceManager.default.registerService('foo', new FooService());
 
+**RPC-Aware Services**
+
+Services can get the raw RPC request in one of two ways.
+
+- Via the `ServiceManager.curRequest` object.
+- By marking themselves as `_rpcAware`, in which case the request will be added
+  to the arguments being passed to the function. This can be either at the
+  service or function level.
+
+In addition, services can return JSON-RPC 2.0-compliant response objects, in
+which case that object will be returned to the client as-is.
+
+    const rpcAwareService = {
+      rpcAware: true,
+      echo(message, rpcRequest) {
+        return {result: message, id: rpcRequest.id};
+      }
+    };
+
+    const serviceWithRpcAwareFunction = {
+      echo(message, rpcRequest) {
+        return {result: message, id: rpcRequest.id};
+      }
+    };
+    serviceWithRpcAwareFunction.echo.rpcAware = true;
+
+    const serviceUsingGlobalRequest = {
+      echo(message) {
+        let rpcRequest = rpc.ServiceManager.curRequest;
+        return {result: message, id: rpcRequest.id};
+      }
+    };
+
 ### Asynchronous Methods in Services
 
 If a method on a service is asynchronous, it must return a `Promise`. If a

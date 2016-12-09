@@ -54,7 +54,7 @@ function ServiceManager(handler) {
 
   class _ServiceManager extends EventEmitter {
     serviceExists(service='') {
-      return services[service];
+      return services[service] !== undefined;
     }
 
     getServiceNames() {
@@ -148,7 +148,7 @@ function ServiceManager(handler) {
         // The servce _might_ return an RPCResponse, so use it as-is if so.
         let resp;
         if (v !== undefined && (v.result || v.error)) {
-          resp = v;
+          resp = Object.assign({}, v);
         } else {
           resp = new RPCResponse(v, null);
         }
@@ -156,7 +156,7 @@ function ServiceManager(handler) {
         if (req.id) {
           resp.id = req.id;
         }
-        this.emit(resp.result !== undefined ? 'methodSucceeded' : 'methodFailed', req, resp);
+        this.emit(resp.error === undefined ? 'methodSucceeded' : 'methodFailed', req, resp);
         this.emit('methodCompleted', req, resp);
         if (req.id === null || req.id === undefined) {
           // No ID, no response, per spec.
@@ -191,7 +191,7 @@ function ServiceManager(handler) {
         if (!Array.isArray(params)) {
           params = [params];
         }
-        if (fn._rpcAware || serviceHandler._rpcAware) {
+        if (fn.rpcAware || serviceHandler.rpcAware) {
           params = params.concat(req);
         }
         ServiceManager.curRequest = req;
