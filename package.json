@@ -6,7 +6,7 @@
     "JSON-RPC",
     "RPC"
   ],
-  "main": "./dist",
+  "main": "./index",
   "scripts": {
     "prepublish": "babel src/server -d server; babel src/client -d client; webpack",
     "test": "mocha --compilers js:babel-register",
