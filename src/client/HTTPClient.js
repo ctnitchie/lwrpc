@@ -1,7 +1,11 @@
 import Call from './Call';
 import {EventEmitter} from 'events';
 
-function HTTPClient(baseUrl) {
+function HTTPClient(baseUrl, opts) {
+  opts = Object.assign({}, HTTPClient.defaults, opts || {});
+  if (!baseUrl.substring(baseUrl.length - 1) !== '/') {
+    baseUrl += '/';
+  }
 
   function doPost(url, body) {
     let params = {
@@ -12,6 +16,12 @@ function HTTPClient(baseUrl) {
       credentials: 'same-origin',
       body: JSON.stringify(body)
     };
+    if (opts.headers) {
+      Object.assign(params.headers, opts.headers);
+    }
+    if (opts.credentials) {
+      params.credentials = opts.credentials;
+    }
     client.emit('request', url, body, params);
     return fetch(url, params)
         .then(checkStatus)
@@ -33,7 +43,14 @@ function HTTPClient(baseUrl) {
 
   function sendCall(service, method, params, isNotification) {
     let call = new Call(method, params, isNotification);
-    let url = baseUrl + (service || '');
+    let url = baseUrl;
+    if (service) {
+      if (opts.mode === 'methodPrefix') {
+        call.method = service + '.' + call.method;
+      } else {
+        url += service || '';
+      }
+    }
     let p = doPost(url, call);
     if (call.id) {
       return p;
@@ -53,5 +70,11 @@ function HTTPClient(baseUrl) {
   });
   return client;
 }
+
+HTTPClient.defaults = {
+  headers: {},
+  mode: 'urlSuffix',
+  credentials: 'same-origin'
+};
 
 export default HTTPClient;

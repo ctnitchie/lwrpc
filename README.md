@@ -259,11 +259,22 @@ process.
 The `expressBinding()` function binds a `ServiceManager` to an Express `Router`
 for handling RPC requests over `HTTP POST`.
 
-    expressBinding([serviceManager], router);
+    expressBinding(router, opts);
 
-If no `serviceManager` is provided, the default will be used. Requests sent to
-the base URL of the router will be interpreted as calls to the default service.
-Otherwise, address specific services by their names as part of the URL path.
+If no `serviceManager` is provided, the default will be used.
+
+Options:
+
+- `serviceManager` - The `ServiceManager` instance to use;
+  `ServiceManager.default` by default.
+- `mode` - Either `"urlSuffix"` (the default) or `"methodPrefix"`.
+  - `"urlSuffix"` means that named services are addressed by adding their names
+    to the end of the base URL. For instance, POSTs to `/rpc/echo` would go to
+    the `echo` service.
+  - `"methodPrefix"` means that all requests to all services are handled by the
+    base URL, and the service is indicated by a prefix on the `method` property
+    of the request. For instance, all requests would go to `/rpc`, with calls
+    to `method: "echo.doEcho"` being routed to the `echo` service.
 
 This function returns the router.
 
@@ -346,7 +357,25 @@ The `HTTPClient` class uses the
 [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) to send
 HTTP POST requests to the appropriate service.
 
-    var client = rpc.HTTPClient(baseUrl);
+    var client = rpc.HTTPClient(baseUrl, opts);
+
+Options:
+
+- `headers` - An object containing HTTP headers to add to all RPC requests. The
+  `Content-Type` header will always be set to `"application/json"`.
+- `mode` - Either `"urlSuffix"` (the default) or `"methodPrefix"`.
+  - `"urlSuffix"` means that calls to a specific service will go to a URL ending
+    with that service name. For instance, calls to the `echo` service would go
+    to `/rpc/echo`.
+  - `"methodPrefix"` means that the service name, if present, will be prepended
+    to the method name in the `method` value sent to the server, and all
+    requests will go to the same URL. For instance, a call to the `doEcho`
+    method of the `echo` service would all go to `/rpc`, but the `"method"`
+    in the request would be set to `"echo.doEcho"`.
+- `credentials` - The credentials to be assigned to the `credentials` field in
+  fetch requests. See the
+  [API documentation](https://developer.mozilla.org/en-US/docs/Web/API/Request/credentials)
+  for details. Set to `"same-origin"` by default.
 
 The resulting object is an `EventEmitter` with the following events:
 
@@ -358,8 +387,7 @@ The resulting object is an `EventEmitter` with the following events:
 
 **NOTE:** The Fetch API is not supported in Node.js and is not available on some
 browsers, so you'll want to use a polyfill, like
-[this one](https://github.com/github/fetch) (for browsers) or
-[this one](https://www.npmjs.com/package/isomorphic-fetch) (for Node).
+[this one](https://www.npmjs.com/package/isomorphic-fetch).
 
 ## SocketClient
 

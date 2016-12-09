@@ -42,7 +42,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'static')));
 app.use(express.static(path.join(__dirname, '../dist/browser')));
-app.use('/rpc', rpc.expressBinding(express.Router(), serviceManager));
+app.use('/services', rpc.expressBinding(express.Router(), {serviceManager}));
+app.use('/rpc', rpc.expressBinding(express.Router(), {serviceManager, mode: 'methodPrefix'}));
 
 const server = http.createServer(app);
 server.listen(2999);

@@ -10,7 +10,7 @@
   <script>
 $(function() {
   var $log = $('#log');
-  var httpClient = rpc.HTTPClient('/rpc/');
+  var httpClient = rpc.HTTPClient('/services/');
   var socketClient = rpc.SocketClient(io());
 
   var testProxy = rpc.Proxy(httpClient, null, 'set', 'get', 'throwsException');
