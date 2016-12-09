@@ -285,7 +285,7 @@ dependency on Express.
 
 The `socketioBinding()` function binds a `ServiceManager` to a socket.io server.
 
-    socketioBinding([serviceManager], server, options);
+    socketioBinding([serviceManager], server, [options]);
 
 Once bound, clients can send `call` messages whose body is the RPC request to
 invoke methods on the default service, and `call:serviceName` for calls to
@@ -294,6 +294,10 @@ to have them executed in batch, per the JSON-RPC 2.0 spec. The base message
 can be customized via the `callMessage` option. Method returns will be
 transmitted as `return` messages whose body is the call result, when a result
 is required. This message can be customized via the `returnMessage` option.
+
+**NOTE:** Attempts to call invalid services will fail silently over WebSockets.
+This is because the server is not listening for messages to services it doesn't
+know about, and so will never acknowledge them.
 
 ### Creating Custom Bindings
 
@@ -372,7 +376,3 @@ The `SocketClient` emits the following events:
 
 - `sending(service, topic, message)` before sending a request.
 - `received(response)` when a response is recieved.
-
-**NOTE:** Attempts to call invalid services will fail silently over WebSockets.
-This is because the server is not listening for messages to services it doesn't
-know about, and so will never acknowledge them.
