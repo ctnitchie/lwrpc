@@ -14,6 +14,10 @@
   },
   "author": "Chris Nitchie <cnitchie@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ctnitchie/lwrpc"
+  },
   "dependencies": {},
   "devDependencies": {
     "babel-loader": "^6.2.9",
