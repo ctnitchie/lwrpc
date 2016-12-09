@@ -92,9 +92,9 @@ Getting Started
 
 ### Using WebSockets
 
-    socket.emit('call:echo', {
+    socket.emit('call', {
       jsonrpc: "2.0",
-      method: "doEcho",
+      method: "echo.doEcho",
       params: ["test"],
       id: 1
     });
