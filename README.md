@@ -40,8 +40,8 @@ Getting Started
 
 ### From node.js clients
 
-    // Load the 'fetch' polyfill and other dependencies
-    require('node-fetch');
+    // Load a 'fetch' polyfill and other dependencies
+    require('isomorphic-fetch');
     const io = require('socket.io-client');
 
     // Load the library
