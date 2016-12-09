@@ -1,6 +1,6 @@
 {
   "name": "lwrpc",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "A simple, transport-independent JSON-RPC 2.0 client and server library for node.js and browsers.",
   "keywords": [
     "JSON-RPC",
