@@ -296,21 +296,32 @@ dependency on Express.
 
 The `socketioBinding()` function binds a `ServiceManager` to a socket.io server.
 
-    socketioBinding([serviceManager], server, [options]);
+    socketioBinding(server, [options]);
 
-Once bound, clients can send `call` messages whose body is the RPC request to
-invoke methods on the default service, and `call:serviceName` for calls to
-specific named services. The client may pass an array of method call requests
-to have them executed in batch, per the JSON-RPC 2.0 spec. The base message
-can be customized via the `callMessage` option. Method returns will be
-transmitted as `return` messages whose body is the call result, when a result
-is required. This message can be customized via the `returnMessage` option.
+Options:
 
-**NOTE:** Attempts to call invalid services will fail silently over WebSockets.
-This is because the server is not listening for messages to services it doesn't
-know about, and so will never acknowledge them.
+- `serviceManager` - The `ServiceManager` instance to use. Defaults to
+  `ServiceManager.default`.
+- `callMessage` - The event to listen to for requests. Defaults to `"call"`.
+  Calls to named services may use a different message; see `mode`.
+- `returnMessage` - The event to send for return values. Defaults to
+  `"return"`.
+- `mode` - Either `methodPrefix` (the default) or `channelSuffix`.
+  - In `methodPrefix` mode, the name of the service is assumed to be prepended
+    to the `method` property of the request, followed by a period. For example,
+    a call to `echo.doEcho` would be interpreted as a call to the `doEcho`
+    method on the `echo` service. A method with no period in the name would be
+    routed to the default service in the `serviceManager`.
+  - In `channelSuffix` mode, the service name would be appended to the
+    `callMessage` event name with a colon. For example, calls to the `echo`
+    service would be listened for with the `"call:echo"` event. Periods in
+    method names are assumed to be part of the method property name on the
+    service object. So a `call` for `echo.doEcho` would invoke
+    `defaultService["echo.doEcho"]()`, not `echo.doEcho()`. Note that in this
+    mode, calls to invalid service names fail silently, as no listener exists on
+    for the events used by those services.
 
-### Creating Custom Bindings
+### Creating New Transport Bindings
 
 Creating a transport binding is relatively simple. All the binding does is
 interpret incoming messages over some transport into JSON-RPC 2.0 method call
@@ -396,9 +407,21 @@ RPC server.
 
     var client = rpc.SocketClient(connection, options);
 
-By default, the client will send requests using `call` for the default service,
-`call:service`, and listen for `return` messages. You can alter this using the
-`callMessage` and `returnMessage` options.
+Options:
+- `callMessage` - The event to emit for requests. Defaults to `"call"`.
+  Calls to named services may use a different message; see `mode`.
+- `returnMessage` - The event to listen to for return values. Defaults to
+  `"return"`.
+- `mode` - Either `methodPrefix` (the default) or `channelSuffix`.
+  - In `methodPrefix` mode, the name of the service is prepended
+    to the method name, followed by a period. For example,
+    `call('echo', 'doEcho', 'test')` would send `"method": "echo.doEcho"` via
+    the event named by `callMessage`. Calls to the `null` service have no
+    prefix.
+  - In `channelSuffix` mode, the service name is appended to the
+    `callMessage` event name with a colon. For example, calls to the `echo`
+    service would be sent with the `"call:echo"` event, and the `method`
+    property of the request is unchanged.
 
 The `SocketClient` emits the following events:
 

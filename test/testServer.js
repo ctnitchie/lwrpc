@@ -41,7 +41,7 @@ app.set('port', 2999);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'static')));
-app.use(express.static(path.join(__dirname, '../dist/browser')));
+app.use(express.static(path.join(__dirname, '../browser')));
 app.use('/services', rpc.expressBinding(express.Router(), {serviceManager}));
 app.use('/rpc', rpc.expressBinding(express.Router(), {serviceManager, mode: 'methodPrefix'}));
 
@@ -49,6 +49,12 @@ const server = http.createServer(app);
 server.listen(2999);
 
 const io = socketio(server);
-rpc.socketioBinding(io, serviceManager);
+rpc.socketioBinding(io, {serviceManager});
+rpc.socketioBinding(io, {
+  serviceManager,
+  mode: 'channelSuffix',
+  callMessage: 'call2',
+  returnMessage: 'return2'
+});
 
 export {app, server, io, serviceManager};
