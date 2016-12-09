@@ -12,7 +12,7 @@
     "test": "mocha --compilers js:babel-register",
     "clean": "rimraf client server browser"
   },
-  "author": "Chris Nitchie <cnitchie@gmail.com>",
+  "author": "Chris Nitchie <chris@nitchie.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
