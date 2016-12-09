@@ -1,6 +1,8 @@
 lwrpc
 =====
 
+[![Build Status](https://travis-ci.org/ctnitchie/lwrpc.svg?branch=master)](https://travis-ci.org/ctnitchie/lwrpc)
+
 Lightweight, JSON-RPC 2.0 client and server plumbing for Node.js and browsers.
 This library allows you to
 
