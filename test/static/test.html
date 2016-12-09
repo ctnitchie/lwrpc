@@ -6,36 +6,43 @@
   <script
   src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+
   <script>
 $(function() {
   var $log = $('#log');
   var httpClient = rpc.HTTPClient('/rpc/');
   var socketClient = rpc.SocketClient(io());
-  var testProxy = rpc.Proxy(httpClient, null, 'set', 'get');
+
+  var testProxy = rpc.Proxy(httpClient, null, 'set', 'get', 'throwsException');
   testProxy.get().then(function(v) {
-    log.append('Response from get: ' + v + '\n');
+    $log.append('Response from get: ' + v + '\n');
     return testProxy.set(v + 1);
   }).then(function(v) {
-    log.append('Response from set: ' + v + '\n');
+    $log.append('Response from set: ' + v + '\n');
     return testProxy.get();
   }).then(function(v) {
-    log.append('Response from get: ' + v + '\n');
+    $log.append('Response from get: ' + v + '\n');
   }).catch(function(e) {
     console.log(e);
-    log.append('ERROR:\n');
-    log.append(e);
-    log.append('\n');
+    $log.append('UNEXPECTED ERROR:\n\t');
+    $log.append(e + '\n');
   });
 
-  var echoProxy = rpc.Proxy(socketClient, 'echo', 'echo');
+  testProxy.throwsException().catch(function(e) {
+    $log.append('EXPECTED EXCEPTION: ' + e + '\n');
+  });
+
+  var echoProxy = rpc.Proxy(socketClient, 'echo', 'echo', 'invalidMethod');
   echoProxy.echo('test').then(function(v) {
-    log.append('Echo response: ' + v + '\n');
+    $log.append('Echo response: ' + v + '\n');
   });
 
-  var errorProxy = rpc.Proxy(socketClient, 'echo', 'invalidMethod');
-  errorProxy.invalidMethod().catch(function (e) {
-    log.append('EXPECTED ERROR:\n');
-    log.append(e + '\n');
+  echoProxy.echo('test again').then(function(v) {
+    $log.append('Second Echo response: ' + v + '\n');
+  });
+
+  echoProxy.invalidMethod().catch(function (e) {
+    $log.append('EXPECTED NOSUCHMETHOD ERROR: ' + e + '\n');
   });
 });
   </script>
