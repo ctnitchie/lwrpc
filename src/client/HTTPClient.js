@@ -3,9 +3,6 @@ import {EventEmitter} from 'events';
 
 function HTTPClient(baseUrl, opts) {
   opts = Object.assign({}, HTTPClient.defaults, opts || {});
-  if (!baseUrl.substring(baseUrl.length - 1) !== '/') {
-    baseUrl += '/';
-  }
 
   function doPost(url, body) {
     let params = {
@@ -48,7 +45,10 @@ function HTTPClient(baseUrl, opts) {
       if (opts.mode === 'methodPrefix') {
         call.method = service + '.' + call.method;
       } else {
-        url += service || '';
+        if (!baseUrl.substring(baseUrl.length - 1) !== '/') {
+          url += '/';
+        }
+        url += service;
       }
     }
     let p = doPost(url, call);
