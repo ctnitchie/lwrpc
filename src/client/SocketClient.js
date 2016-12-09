@@ -9,8 +9,10 @@ function SocketClient(socket, opts) {
     client.emit('received', resp);
 
     function processReturnMessage(msg) {
-      pendingReturns[msg.id](msg);
-      delete pendingReturns[msg.id];
+      if (pendingReturns[msg.id]) {
+        pendingReturns[msg.id](msg);
+        delete pendingReturns[msg.id];
+      }
     }
 
     if (Array.isArray(resp)) {
