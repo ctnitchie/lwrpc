@@ -178,7 +178,7 @@ default `ServiceManager` instance. Its methods are also exposed on the
 Services can get the raw RPC request in one of two ways.
 
 - Via the `ServiceManager.curRequest` object.
-- By marking themselves as `_rpcAware`, in which case the request will be added
+- By marking themselves as `rpcAware`, in which case the request will be added
   to the arguments being passed to the function. This can be either at the
   service or function level.
 
