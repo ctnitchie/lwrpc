@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Proxy as RPCProxy} from '../client';
+import {Proxy as RPCProxy} from '../src/client';
 import {serviceManager} from './testServer';
 
 function remoteTests(client) {

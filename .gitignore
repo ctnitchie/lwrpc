@@ -1,5 +1,5 @@
-dist/client
-dist/server
-dist/browser
+/client
+/server
+/browser
 .DS_Store
 node_modules

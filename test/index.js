@@ -3,7 +3,7 @@ import './testServer';
 import remoteTests from './remoteTests';
 import io from 'socket.io-client';
 
-import {HTTPClient, SocketClient} from '../client';
+import {HTTPClient, SocketClient} from '../src/client';
 
 const httpClient = new HTTPClient('http://localhost:2999/rpc/');
 const socketClient = new SocketClient(io('http://localhost:2999'));

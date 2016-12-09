@@ -4,7 +4,7 @@ import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
 
-import * as rpc from '../lib';
+import * as rpc from '../src/server';
 
 class TestService {
   constructor() {

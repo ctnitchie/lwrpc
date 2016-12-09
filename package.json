@@ -8,9 +8,9 @@
   ],
   "main": "./dist",
   "scripts": {
-    "prepublish": "babel lib -d dist/server; babel client -d dist/client; webpack",
+    "prepublish": "babel src/server -d server; babel src/client -d client; webpack",
     "test": "mocha --compilers js:babel-register",
-    "clean": "rimraf dist/client/* dist/server/* dist/browser/*"
+    "clean": "rimraf client server browser"
   },
   "author": "Chris Nitchie <cnitchie@gmail.com>",
   "license": "MIT",

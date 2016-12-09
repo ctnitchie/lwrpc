@@ -2,7 +2,7 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    app: './dist/client/index.js',
+    app: './client/index.js',
   },
   plugins: [
     new webpack.optimize.UglifyJsPlugin({
@@ -12,7 +12,7 @@ module.exports = {
     })
   ],
   output: {
-    path: __dirname + '/dist/browser',
+    path: __dirname + '/browser',
     filename: 'rpcClient.js'
   }
 };
